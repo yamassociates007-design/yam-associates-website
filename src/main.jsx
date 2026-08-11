@@ -2,8 +2,6 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import { supabase } from './supabase';
-import { supabase } from './supabase';
-import { supabase } from './supabase';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';

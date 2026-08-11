@@ -1,6 +1,11 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import { supabase } from './supabase';
+import { supabase } from './supabase';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import './styles.css';
 
 const practiceAreas = [
   ['01', 'Civil Litigation', 'Strategic representation for civil disputes, recovery matters and injunctions.'],

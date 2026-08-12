@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import { supabase } from './supabase';
@@ -13,8 +13,65 @@ const practiceAreas = [
 ];
 
 function App() {
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
   const whatsapp =
     'https://wa.me/91XXXXXXXXXX?text=Hello%20YAM%20Associates%2C%20I%20would%20like%20a%20legal%20consultation';
+
+  const generateClientCode = () => {
+    const random = Math.floor(100000 + Math.random() * 900000);
+    return `YAM-${random}`;
+  };
+
+  const handleAppointment = async (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+    setSuccess('');
+    setError('');
+
+    const form = e.target;
+
+    const full_name = form.full_name.value.trim();
+    const mobile = form.mobile.value.trim();
+    const email = form.email.value.trim();
+    const practice_area = form.practice_area.value;
+    const message = form.message.value.trim();
+
+    const client_code = generateClientCode();
+
+    const { error: insertError } = await supabase
+      .from('appointments')
+      .insert([
+        {
+          client_code,
+          full_name,
+          mobile,
+          email,
+          practice_area,
+          message,
+          status: 'pending',
+        },
+      ]);
+
+    setLoading(false);
+
+    if (insertError) {
+      console.error(insertError);
+      setError(
+        'Appointment save nahi ho paya. Please dobara try karein.'
+      );
+      return;
+    }
+
+    setSuccess(
+      `Appointment successfully submitted. Your Client Code is ${client_code}`
+    );
+
+    form.reset();
+  };
 
   return (
     <div>
@@ -56,8 +113,8 @@ function App() {
             </h1>
 
             <p className="hero-copy">
-              Professional legal assistance built around clarity, preparation
-              and client-focused representation.
+              Professional legal assistance built around clarity,
+              preparation and client-focused representation.
             </p>
 
             <div className="actions">
@@ -79,7 +136,9 @@ function App() {
         </section>
 
         <section id="about" className="about section">
-          <div className="section-label">01 / ABOUT YAM ASSOCIATES</div>
+          <div className="section-label">
+            01 / ABOUT YAM ASSOCIATES
+          </div>
 
           <div className="two-col">
             <div>
@@ -93,21 +152,24 @@ function App() {
             <div>
               <p className="lead">
                 YAM Associates is being built as a modern legal practice
-                focused on accessible consultation, organized case management
-                and practical legal solutions.
+                focused on accessible consultation, organized case
+                management and practical legal solutions.
               </p>
 
               <p>
-                Our digital client portal will allow clients to securely follow
-                important case updates while the internal dashboard helps the
-                legal team prioritize urgent, pending and scheduled matters.
+                Our digital client portal will allow clients to securely
+                follow important case updates while the internal dashboard
+                helps the legal team prioritize urgent, pending and
+                scheduled matters.
               </p>
             </div>
           </div>
         </section>
 
         <section id="practice" className="section dark-section">
-          <div className="section-label">02 / PRACTICE AREAS</div>
+          <div className="section-label">
+            02 / PRACTICE AREAS
+          </div>
 
           <h2>
             Focused legal <em>expertise</em>
@@ -119,14 +181,18 @@ function App() {
                 <span>{n}</span>
                 <h3>{t}</h3>
                 <p>{d}</p>
-                <a href="#appointment">Discuss your matter →</a>
+                <a href="#appointment">
+                  Discuss your matter →
+                </a>
               </article>
             ))}
           </div>
         </section>
 
         <section id="process" className="section process">
-          <div className="section-label">03 / SIMPLE CLIENT JOURNEY</div>
+          <div className="section-label">
+            03 / SIMPLE CLIENT JOURNEY
+          </div>
 
           <h2>
             From consultation to <em>case updates</em>
@@ -164,8 +230,8 @@ function App() {
               <b>04</b>
               <h3>Track</h3>
               <p>
-                Use your secure client portal to view available case updates
-                anytime.
+                Use your secure client portal to view available case
+                updates anytime.
               </p>
             </div>
           </div>
@@ -174,53 +240,97 @@ function App() {
         <section id="appointment" className="appointment section">
           <div className="appointment-box">
             <div>
-              <div className="section-label">04 / CONSULTATION</div>
+              <div className="section-label">
+                04 / CONSULTATION
+              </div>
 
               <h2>Book a consultation</h2>
 
               <p>
-                Consultation fee: <strong>₹699</strong>. Payment integration
-                will be connected to your Razorpay account before launch.
+                Consultation fee: <strong>₹699</strong>.
               </p>
 
               <ul>
                 <li>Secure appointment details</li>
-                <li>Unique client reference after payment</li>
+                <li>Unique client reference after submission</li>
                 <li>Direct WhatsApp assistance</li>
               </ul>
+
+              {success && (
+                <div
+                  style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                    border: '1px solid #c9a227',
+                  }}
+                >
+                  <strong>{success}</strong>
+                  <br />
+                  Please save your Client Code.
+                </div>
+              )}
+
+              {error && (
+                <div
+                  style={{
+                    marginTop: '20px',
+                    padding: '15px',
+                  }}
+                >
+                  {error}
+                </div>
+              )}
             </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                alert(
-                  'Demo form only. Razorpay and database will be connected in the next phase.'
-                );
-              }}
-            >
-              <input required placeholder="Full Name" />
+            <form onSubmit={handleAppointment}>
+              <input
+                name="full_name"
+                required
+                placeholder="Full Name"
+              />
 
-              <input required placeholder="Mobile Number" />
+              <input
+                name="mobile"
+                required
+                placeholder="Mobile Number"
+              />
 
-              <input type="email" placeholder="Email Address" />
+              <input
+                name="email"
+                type="email"
+                placeholder="Email Address"
+              />
 
-              <select defaultValue="">
+              <select
+                name="practice_area"
+                defaultValue=""
+                required
+              >
                 <option value="" disabled>
                   Select Practice Area
                 </option>
 
                 {practiceAreas.map(([, t]) => (
-                  <option key={t}>{t}</option>
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
                 ))}
               </select>
 
               <textarea
+                name="message"
                 required
                 placeholder="Briefly describe your legal matter"
               />
 
-              <button className="button gold" type="submit">
-                Continue to Payment — ₹699
+              <button
+                className="button gold"
+                type="submit"
+                disabled={loading}
+              >
+                {loading
+                  ? 'Submitting...'
+                  : 'Submit Consultation — ₹699'}
               </button>
             </form>
           </div>
@@ -228,7 +338,9 @@ function App() {
 
         <section id="status" className="status section">
           <div>
-            <div className="section-label">05 / CLIENT PORTAL</div>
+            <div className="section-label">
+              05 / CLIENT PORTAL
+            </div>
 
             <h2>
               Your matter.
@@ -237,9 +349,9 @@ function App() {
             </h2>
 
             <p>
-              Clients will be able to securely check case status, next hearing
-              dates, recent updates and advocate remarks using their unique
-              Client Code.
+              Clients will be able to securely check case status,
+              next hearing dates, recent updates and advocate remarks
+              using their unique Client Code.
             </p>
           </div>
 
@@ -248,15 +360,21 @@ function App() {
 
             <input placeholder="Enter Client Code" />
 
-            <button className="button dark">Check Status</button>
+            <button className="button dark">
+              Check Status
+            </button>
 
-            <small>Secure OTP login will be enabled in the next phase.</small>
+            <small>
+              Secure OTP login will be enabled in the next phase.
+            </small>
           </div>
         </section>
 
         <section id="contact" className="contact section">
           <div>
-            <div className="section-label">06 / CONTACT</div>
+            <div className="section-label">
+              06 / CONTACT
+            </div>
 
             <h2>
               Let's discuss
